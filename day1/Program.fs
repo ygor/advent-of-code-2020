@@ -5,33 +5,20 @@ let numbers =
     |> Seq.toList
     |> List.map int
 
-let rec pairs = function
-    | [] -> []
+let rec part1 sum = function
+    | [] -> 0
     | x :: xs ->
-        xs
-        |> List.map (fun b -> x, b)
-        |> List.append (pairs xs)
+        if Seq.contains (sum - x) xs then x * (sum - x) else (part1 sum xs)
 
-let rec triplets = function
-    | [] -> []
+let rec part2 = function
+    | [] -> 0
     | x :: xs ->
-        pairs xs
-        |> List.map (fun (a, b) -> x, a, b)
-        |> List.append (triplets xs)
+        match part1 (2020 - x) xs with
+        | 0 -> part2 xs
+        | y -> x * y 
 
 [<EntryPoint>]
-let main argv =
-    let (a, b) =
-        numbers
-        |> pairs
-        |> Seq.find (fun (a, b) -> a + b = 2020)
-
-    printfn "Part 1: %i" (a * b)
-
-    let (a, b, c) =
-        numbers
-        |> triplets
-        |> Seq.find (fun (a, b, c) -> a + b + c = 2020)
-
-    printfn "Part 2: %i" (a * b * c)
+let main _ =
+    printfn "Part 1: %i" (part1 2020 numbers)
+    printfn "Part 2: %i" (part2 numbers)
     0
