@@ -19,6 +19,6 @@ let rec part2 sum = function
 
 [<EntryPoint>]
 let main _ =
-    printfn "Part 1: %i" (part1 2020 numbers)
-    printfn "Part 2: %i" (part2 2020 numbers)
+    printfn $"Part 1: {part1 2020 numbers}"
+    printfn $"Part 2: {part2 2020 numbers}"
     0
