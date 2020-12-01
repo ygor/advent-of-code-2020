@@ -9,7 +9,7 @@ let rec pairs = function
     | [] -> []
     | x :: xs ->
         xs
-        |> List.map (fun elem -> x, elem)
+        |> List.map (fun b -> x, b)
         |> List.append (pairs xs)
 
 let rec triplets = function
