@@ -8,15 +8,18 @@ let numbers =
 let rec pairs lst =
     match lst with
     | [] -> []
-    | h :: t -> List.map (fun elem -> (h, elem)) t @ pairs t
+    | x :: xs ->
+        xs
+        |> List.map (fun elem -> (x, elem))
+        |> List.append (pairs xs)
 
 let rec triplets lst =
     match lst with
     | [] -> []
-    | h :: t ->
-        pairs t
-        |> List.map (fun (a, b) -> h, a, b)
-        |> List.append (triplets t)
+    | x :: xs ->
+        pairs xs
+        |> List.map (fun (a, b) -> x, a, b)
+        |> List.append (triplets xs)
 
 [<EntryPoint>]
 let main argv =
