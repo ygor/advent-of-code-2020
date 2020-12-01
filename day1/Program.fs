@@ -13,7 +13,7 @@ let rec part1 sum = function
 let rec part2 sum = function
     | [] -> 0
     | x :: xs ->
-        match part1 (2020 - x) xs with
+        match part1 (sum - x) xs with
         | 0 -> part2 sum xs
         | y -> x * y 
 
