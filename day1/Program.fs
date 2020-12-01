@@ -5,16 +5,14 @@ let numbers =
     |> Seq.toList
     |> List.map int
 
-let rec pairs lst =
-    match lst with
+let rec pairs = function
     | [] -> []
     | x :: xs ->
         xs
         |> List.map (fun elem -> x, elem)
         |> List.append (pairs xs)
 
-let rec triplets lst =
-    match lst with
+let rec triplets = function
     | [] -> []
     | x :: xs ->
         pairs xs
