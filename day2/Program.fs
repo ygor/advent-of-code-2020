@@ -16,7 +16,7 @@ let list =
 let rentalValidator ((min, max, letter): Policy, password: Password) =
     let count =
         password
-        |> Seq.filter (fun c -> c = letter)
+        |> Seq.filter ((=) letter)
         |> Seq.length
 
     count >= min && count <= max
