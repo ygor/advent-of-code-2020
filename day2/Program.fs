@@ -35,5 +35,5 @@ let validPasswords validator =
 [<EntryPoint>]
 let main _ =
     printfn "Part 1: %i" (validPasswords rentalValidator)
-    printfn "Part 2: %i" ((validPasswords tobogganValidator))
+    printfn "Part 2: %i" (validPasswords tobogganValidator)
     0
