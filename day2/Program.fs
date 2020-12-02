@@ -22,12 +22,8 @@ let rentalValidator ((min, max, letter): Policy, password: Password) =
     count >= min && count <= max
 
 let tobogganValidator ((pos1, pos2, letter): Policy, password: Password) =
-    let matches =
-        [ password.[pos1 - 1]
-          password.[pos2 - 1] ]
-        |> Seq.filter ((=) letter)
-
-    Seq.length matches = 1
+    (password.[pos1 - 1] = letter)
+    <> (password.[pos2 - 1] = letter)
 
 let validPasswords validator =
     list |> Seq.filter validator |> Seq.length
