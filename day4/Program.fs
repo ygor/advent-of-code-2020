@@ -4,8 +4,8 @@ open Extensions
 
 type Passport = Map<string, string>
 
-let inRange number min max = number >= min && number <= max
 let isMatch pattern value = Regex.IsMatch(value, pattern)
+let inRange number min max = number >= min && number <= max
 
 let isYearInRange (min, max) =
     function
