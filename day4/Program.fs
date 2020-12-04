@@ -7,13 +7,11 @@ type Passport = Map<string, string>
 let isMatch pattern value = Regex.IsMatch(value, pattern)
 let inRange number min max = number >= min && number <= max
 
-let isYearInRange (min, max) =
-    function
+let isYearInRange (min, max) = function
     | Regex "^([0-9]{4})$" [ number ] -> inRange (int number) min max
     | _ -> false
 
-let isValidHeight =
-    function
+let isValidHeight = function
     | Regex "^(\d+)cm$" [ number ] -> inRange (int number) 150 193
     | Regex "^(\d+)in$" [ number ] -> inRange (int number) 59 76
     | _ -> false
