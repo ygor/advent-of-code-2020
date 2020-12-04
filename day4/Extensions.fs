@@ -11,9 +11,6 @@ let (|Regex|_|) pattern input =
 module String =
     let split (sep: string) (value: string) = value.Split(sep) |> List.ofArray
 
-module Int =
-    let inRange (min, max) number = number >= min && number <= max
-
 module List =
     let unpack2 list =
         match list with

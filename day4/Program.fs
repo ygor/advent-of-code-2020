@@ -4,18 +4,19 @@ open Extensions
 
 type Passport = Map<string, string>
 
-let isYearInRange (min, max) = function
-    | Regex "^([0-9]{4})$" [ number ] -> Int.inRange (min, max) (int number)
+let inRange number min max = number >= min && number <= max
+let isMatch pattern value = Regex.IsMatch(value, pattern)
+
+let isYearInRange (min, max) =
+    function
+    | Regex "^([0-9]{4})$" [ number ] -> inRange (int number) min max
     | _ -> false
 
-let isValidHeight  = function
-    | Regex "^(\d+)cm$" [ number ] -> Int.inRange (150, 193) (int number)
-    | Regex "^(\d+)in$" [ number ] -> Int.inRange (59, 76) (int number)
+let isValidHeight =
+    function
+    | Regex "^(\d+)cm$" [ number ] -> inRange (int number) 150 193
+    | Regex "^(\d+)in$" [ number ] -> inRange (int number) 59 76
     | _ -> false
-
-let isValidHairColor value = Regex.IsMatch(value, "^\#([a-f0-9]{6})$")
-let isValidEyeColor value = Regex.IsMatch(value, "^(amb|blu|brn|gry|grn|hzl|oth)$")
-let isValidPID value = Regex.IsMatch(value, "^([0-9]{9})$")
 
 let isValid1 (passport: Passport) =
     [ "byr"
@@ -32,30 +33,24 @@ let isValid2 (passport: Passport) =
       ("iyr", isYearInRange (2010, 2020))
       ("eyr", isYearInRange (2020, 2030))
       ("hgt", isValidHeight)
-      ("hcl", isValidHairColor)
-      ("ecl", isValidEyeColor)
-      ("pid", isValidPID) ]
+      ("hcl", isMatch "^\#([a-f0-9]{6})$")
+      ("ecl", isMatch "^(amb|blu|brn|gry|grn|hzl|oth)$")
+      ("pid", isMatch "^([0-9]{9})$") ]
     |> Seq.fold (fun valid (key, validator) ->
         match Map.tryFind key passport with
         | Some value -> valid && validator value
         | None -> false) true
 
-let addFields (passport: Passport) (line: string) =
-    line
-    |> String.split " "
-    |> Seq.fold (fun (passport': Passport) pair ->
-        pair
-        |> String.split ":"
-        |> List.unpack2
-        |> passport'.Add) passport
-
 let passports =
-    File.ReadAllLines("input.txt")
-    |> Seq.fold (fun (passports: Passport list, passport: Passport) line ->
-        if line = ""
-        then passport :: passports, Map.empty<string, string>
-        else passports, addFields passport line) ([], Map.empty<string, string>)
-    |> fun (passports, passport) -> passport :: passports
+    File.ReadAllText("input.txt")
+    |> String.split "\n\n"
+    |> Seq.map (fun value ->
+        value
+        |> String.split "\n"
+        |> Seq.map (String.split " ")
+        |> Seq.concat
+        |> Seq.map (String.split ":" >> List.unpack2)
+        |> Map.ofSeq)
 
 [<EntryPoint>]
 let main _ =
