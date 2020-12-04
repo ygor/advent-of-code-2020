@@ -1,4 +1,5 @@
 ﻿open System.IO
+open System.Text.RegularExpressions
 open Extensions
 
 type Passport = Map<string, string>
@@ -19,19 +20,12 @@ let isValidHeight value =
     | _ -> false
 
 let isValidHairColor value =
-    match value with
-    | Regex "^\#([a-f0-9]{6})$" [ _ ] -> true
-    | _ -> false
+    Regex.IsMatch(value, "^\#([a-f0-9]{6})$")
 
 let isValidEyeColor value =
-    match value with
-    | Regex "^(amb|blu|brn|gry|grn|hzl|oth)$" [ _ ] -> true
-    | _ -> false
+    Regex.IsMatch(value, "^(amb|blu|brn|gry|grn|hzl|oth)$")
 
-let isValidPid value =
-    match value with
-    | Regex "^([0-9]{9})$" [ _ ] -> true
-    | _ -> false
+let isValidPid value = Regex.IsMatch(value, "^([0-9]{9})$")
 
 let isValid1 (passport: Passport) =
     [ "byr"
