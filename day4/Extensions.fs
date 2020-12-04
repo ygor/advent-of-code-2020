@@ -8,12 +8,11 @@ let (|Regex|_|) pattern input =
     then Some(List.tail [ for g in m.Groups -> g.Value ])
     else None
 
-
 module String =
     let split (sep: string) (value: string) = value.Split(sep) |> List.ofArray
 
 module Int =
-    let inRange (min, max) number = number >= min && number <= max    
+    let inRange (min, max) number = number >= min && number <= max
 
 module List =
     let unpack2 list =
