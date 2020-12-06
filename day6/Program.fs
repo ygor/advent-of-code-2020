@@ -6,12 +6,11 @@ let group operation input =
     |> String.split "\n"
     |> Seq.map Set.ofSeq
     |> Seq.reduce operation
-    |> Seq.length
 
 let count operation =
     File.ReadAllText("input.txt")
     |> String.split "\n\n"
-    |> Seq.sumBy (group operation)
+    |> Seq.sumBy (group operation >> Seq.length)
 
 [<EntryPoint>]
 let main _ =
