@@ -1,26 +1,20 @@
 ﻿open System.IO
-open System.Text.RegularExpressions
 open Extensions
 
-let anyoneYes input =
-    Regex.Replace(input, "\n", "")
-    |> Set.ofSeq
-    |> Seq.length    
-
-let allYes input =
+let group operation input =
     input
     |> String.split "\n"
     |> Seq.map Set.ofSeq
-    |> Seq.reduce Set.intersect
+    |> Seq.reduce operation
     |> Seq.length
 
-let count policy =
+let count operation =
     File.ReadAllText("input.txt")
     |> String.split "\n\n"
-    |> Seq.sumBy policy
+    |> Seq.sumBy (group operation)
 
 [<EntryPoint>]
 let main _ =
-    printfn "Part 1: %i" (count anyoneYes)
-    printfn "Part 2: %i" (count allYes)
+    printfn "Part 1: %i" (count Set.union)
+    printfn "Part 2: %i" (count Set.intersect)
     0
