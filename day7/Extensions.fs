@@ -10,6 +10,7 @@ let (|Regex|_|) pattern input =
 
 module String =
     let split (sep: string) (value: string) = value.Split(sep) |> List.ofArray
+    let contains (pattern: string) (value: string) = value.Contains(pattern)
 
 module List =
     let unpack2 list =

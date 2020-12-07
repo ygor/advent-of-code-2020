@@ -10,38 +10,19 @@ let parseBag input =
 
 let bags =
     File.ReadAllLines("input.txt")
-    |> Seq.fold (fun bags line ->
-        let outer, contain =
-            line |> String.split " contain " |> List.unpack2
+    |> Seq.fold (fun (bags: Bags) line ->
+        match line with
+        | Regex "no other" [] -> bags
+        | Regex "(.*) bags contain (.*)\." [ outer; contain ] ->
+            bags.Add(outer.Replace(" bags", ""), String.split ", " contain |> List.map parseBag)
+        | _ -> failwithf "Invalid input %s" line) Map.empty<string, (int * string) list>
 
-        let inners =
-            match contain with
-            | "no other bags." -> []
-            | _ -> String.split ", " contain |> List.map parseBag
-
-        Map.add (outer.Replace(" bags", "")) inners bags) Map.empty<string, (int * string) list>
-
-let containers =
+let rec part1 id bags =
     bags
-    |> Map.fold (fun res outer inners ->
-        inners
-        |> List.fold (fun (res': Map<string, string Set>) (_, inner) ->
-            match res'.TryFind inner with
-            | Some containers ->
-                res'
-                |> Map.remove inner
-                |> Map.add inner (Set.add outer containers)
-            | None -> Map.add inner (Set.ofList [ outer ]) res') res) Map.empty<string, string Set>
-
-let rec part1 id containers =
-    match Map.tryFind id containers with
-    | Some outers ->
-        outers
-        |> Set.union
-            (outers
-             |> Set.map (fun id' -> part1 id' containers)
-             |> Set.unionMany)
-    | None -> Set.empty
+    |> Map.toSeq
+    |> Seq.filter (snd >> List.map snd >> List.contains id)
+    |> Seq.map (fun (inner, _) -> Set.add inner (part1 inner bags))
+    |> Seq.fold Set.union Set.empty
 
 let rec part2 id bags =
     match Map.tryFind id bags with
@@ -53,6 +34,6 @@ let rec part2 id bags =
 
 [<EntryPoint>]
 let main _ =
-    printfn "Part 1: %i" (part1 "shiny gold" containers |> Set.count)
+    printfn "Part 1: %i" (part1 "shiny gold" bags |> Set.count)
     printfn "Part 2: %i" ((part2 "shiny gold" bags) - 1)
     0
