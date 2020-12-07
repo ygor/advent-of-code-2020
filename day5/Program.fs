@@ -1,11 +1,11 @@
 ﻿open System
 open System.IO
+open Extensions
 
 let seat pass =
     pass
-    |> Seq.fold (fun acc char ->
-        acc
-        + (if Seq.contains char "BR" then "1" else "0")) ""
+    |> Regex.replace "B|R" "1"
+    |> Regex.replace "F|L" "0"
     |> (fun value -> Convert.ToInt32(value, 2))
 
 let seats =
