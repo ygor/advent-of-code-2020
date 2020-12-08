@@ -25,9 +25,13 @@ let rec run (pointer: int) (acc: int) (stack: int list) (instructions: Instructi
         | Jmp n -> (pointer + n), acc
         | Nop _ -> (pointer + 1), acc
 
-    if List.contains pointer' stack then Error acc
-    elif pointer' < 0 || pointer' >= List.length instructions then Ok acc
-    else run pointer' acc' (pointer' :: stack) instructions
+    if List.contains pointer' stack then
+        Error acc
+    elif pointer' < 0
+         || pointer' >= List.length instructions then
+        Ok acc
+    else
+        run pointer' acc' (pointer' :: stack) instructions
 
 let rec patch acc patches instructions =
     match instructions with
@@ -47,7 +51,7 @@ let part2 instructions =
     |> List.map (run 0 0 [])
     |> List.filter (fun res ->
         match res with
-        | Ok _-> true
+        | Ok _ -> true
         | Error _ -> false)
 
 [<EntryPoint>]
