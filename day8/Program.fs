@@ -25,37 +25,29 @@ let rec run (pointer: int) (acc: int) (stack: int list) (instructions: Instructi
         | Jmp n -> (pointer + n), acc
         | Nop _ -> (pointer + 1), acc
 
-    if List.contains pointer' stack then
-        Error acc
-    elif pointer' < 0
-         || pointer' >= List.length instructions then
+    if pointer' = instructions.Length then
         Ok acc
+    elif List.contains pointer' stack
+         || pointer' < 0
+         || pointer' > instructions.Length then
+        Error acc
     else
         run pointer' acc' (pointer' :: stack) instructions
 
-let rec patch acc patches instructions =
-    match instructions with
-    | x :: xs ->
-        let patches' =
-            match x with
-            | Nop n -> (acc @ [ Jmp n ] @ xs) :: patches
-            | Jmp n -> (acc @ [ Nop n ] @ xs) :: patches
-            | _ -> patches
-
-        patch (acc @ [ x ]) patches' xs
-    | [] -> patches
-
-let part2 instructions =
-    instructions
-    |> patch [] []
-    |> List.map (run 0 0 [])
-    |> List.filter (fun res ->
-        match res with
-        | Ok _ -> true
-        | Error _ -> false)
+let patch (instructions: Instruction list) =
+    [ 0 .. (instructions.Length - 1) ]
+    |> List.fold (fun acc i ->
+        match instructions.[i] with
+        | Nop n -> (List.replaceAt i (Jmp n) instructions) :: acc
+        | Jmp n -> (List.replaceAt i (Nop n) instructions) :: acc
+        | _ -> acc) []
 
 [<EntryPoint>]
 let main _ =
     printfn "Part 1: %A" (run 0 0 [] instructions)
-    printfn "Part 2: %A" (part2 instructions)
+
+    patch instructions
+    |> List.map (run 0 0 [])
+    |> List.filter (Result.isOk)
+    |> printfn "Part 2: %A"
     0
