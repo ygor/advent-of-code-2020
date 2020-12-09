@@ -12,7 +12,7 @@ let part1 (numbers: int64 list) =
     |> List.windowed 26
     |> List.find (fun window ->
         window.[0..(Seq.length window - 2)]
-        |> List.combinations 2
+        |> combinations 2
         |> List.map List.sum
         |> (not << List.contains (List.last window)))
     |> List.last
