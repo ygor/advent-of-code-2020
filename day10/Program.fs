@@ -1,5 +1,6 @@
 ﻿open System.IO
 open Extensions
+open Extensions.List
 
 let adapters =
     File.ReadAllLines("input.txt")
@@ -7,33 +8,14 @@ let adapters =
     |> List.ofSeq
     |> List.sort
 
-let part1 (adapters: int list) =
-    let pairs = adapters |> List.pairwise
-
-    let ones =
-        pairs
-        |> List.filter (fun (a, b) -> b - a = 1)
-        |> List.length
-
-    let threes =
-        pairs
-        |> List.filter (fun (a, b) -> b - a = 3)
-        |> List.length
-
-    ones * threes
-
 let diffs adapters =
     adapters
     |> List.pairwise
     |> List.map (fun (a, b) -> b - a)
 
-let rec groups (acc, group) list =
-    match list with
-    | x :: xs ->
-        if x <> 3 then groups (acc, group @ [ x ]) xs
-        elif List.isEmpty group then groups (acc, group) xs
-        else groups (acc @ [ group ], []) xs
-    | _ -> if List.isEmpty group then (acc, []) else (acc @ [ group ], [])
+let part1 (adapters: int list) =
+    let diffs' = diffs adapters
+    [List.length] <*> ([ List.filter ((=) 1); List.filter ((=) 3) ] <*> [diffs']) |> List.reduce (*)   
 
 let rec count group =
     match group with
@@ -43,9 +25,9 @@ let rec count group =
     | x :: xs -> count xs
     | [] -> 1L
 
-let part2 diffs =
-    groups ([], []) diffs
-    |> fst
+let part2 (diffs: int list) =
+    splitBy 3 diffs
+    |> List.filter (List.isEmpty >> not)
     |> List.map count
     |> List.reduce (*)
 
