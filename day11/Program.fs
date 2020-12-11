@@ -1,15 +1,6 @@
-﻿open System.IO
+﻿open System
+open System.IO
 open Extensions
-
-type Seat =
-    | Empty
-    | Occupied
-
-type Position =
-    | Floor
-    | Seat of Seat
-
-type Area = Position [,]
 
 let adjacents (x, y) area =
     [ (x - 1, y + 1)
@@ -36,62 +27,54 @@ let area =
     let width =
         input |> List.map (List.length) |> List.max
 
-    Array2D.init width (input.Length) (fun x y ->
-        match input.[y].[x] with
-        | '.' -> Floor
-        | 'L' -> Seat Empty
-        | '#' -> Seat Occupied
-        | x -> failwithf "Invalid input %c" x)
+    Array2D.init width (input.Length) (fun x y -> input.[y].[x])
 
 let allSeatsEmpty positions =
     positions
-    |> List.forall (fun pos -> pos = Seat Empty || pos = Floor)
+    |> List.forall (fun pos -> pos = 'L' || pos = '.')
 
 let atLeastFourOccupied positions =
     positions
-    |> List.filter (fun pos -> pos = Seat Occupied)
+    |> List.filter ((=) '#')
     |> List.length
-    |> (<) 3
+    >= 4
 
-let next (area: Area) =
-    Array2D.init (Array2D.length1 area) (Array2D.length2 area) (fun x y ->
-        let adjacents' =
-            adjacents (x, y) area
-            |> List.map (fun (x, y) -> area.[x, y])
+let rule1 area x y =
+    let adjacents' =
+        adjacents (x, y) area
+        |> List.map (fun (x, y) -> area.[x, y])
 
-        match area.[x, y] with
-        | Seat Empty -> if allSeatsEmpty adjacents' then Seat Occupied else Seat Empty
-        | Seat Occupied -> if atLeastFourOccupied adjacents' then Seat Empty else Seat Occupied
-        | Floor -> Floor)
+    match area.[x, y] with
+    | 'L' -> if allSeatsEmpty adjacents' then '#' else 'L'
+    | '#' -> if atLeastFourOccupied adjacents' then 'L' else '#'
+    | x -> x
 
-let rec run (area: Area) =
-    let area' = next area
-    if area = area' then area else run area'
+let next area rule =
+    Array2D.init (Array2D.length1 area) (Array2D.length2 area) (rule area)
 
-let occupied (area: Area) =
-    seq {
-        for r in 0 .. (Array2D.length1 area - 1) do
-            for c in 0 .. (Array2D.length2 area - 1) do
-                yield area.[r, c]        
-    }
-    |> Seq.filter (fun value -> value = Seat Occupied)
+let rec run area rule =
+    let area' = next area rule
+    if area = area' then area else run area' rule
+
+let occupied area =
+    area
+    |> Array2D.toSeq
+    |> Seq.filter (fun value -> value = '#')
     |> Seq.length
-    
-let print (area: Area) =
+
+let print area =
     [ 0 .. (Array2D.length2 area - 1) ]
     |> List.map (fun y ->
         area.[*, y]
-        |> Array.map (fun value ->
-            match value with
-            | Seat Empty -> "L"
-            | Seat Occupied -> "#"
-            | Floor -> ".")
+        |> Array.map string
         |> Array.reduce (+)
         |> printfn "%s")
 
+let length (x, y) = Math.Sqrt(x * x + y * y)
+
 [<EntryPoint>]
 let main _ =
-    let area' = run area
+    let area' = run area rule1
     print area' |> ignore
     printfn "Part 1: %A" (occupied area')
     0
