@@ -15,7 +15,7 @@ let diffs adapters =
 
 let part1 (adapters: int list) =
     let diffs' = diffs adapters
-    [List.length] <*> ([ List.filter ((=) 1); List.filter ((=) 3) ] <*> [diffs']) |> List.reduce (*)   
+    countBy ((=) 1) diffs' * countBy ((=) 3) diffs' 
 
 let rec count group =
     match group with
@@ -33,7 +33,7 @@ let part2 (diffs: int list) =
 
 [<EntryPoint>]
 let main _ =
-    let adapters' = 0 :: adapters @ [ List.max adapters + 3 ]
+    let adapters' = 0 :: adapters @ [ List.last adapters + 3 ]
 
     printfn "Part 1: %A" (part1 adapters')
     printfn "Part 2: %A" (part2 (diffs adapters'))

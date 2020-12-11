@@ -1,18 +1,11 @@
 module Extensions
 
-module String =
-    let split (sep: string) (value: string) = value.Split(sep) |> List.ofArray
-
 module List =
-    let apply (fList: ('a -> 'b) list) (xList: 'a list) =
-        [ for f in fList do
-            for x in xList do
-                yield f x ]
-
-    let (<*>) = apply
-
-    let (<!>) = List.map
-
+    let countBy predicate list =
+        list
+        |> List.filter predicate
+        |> List.length
+        
     let splitBy sep list =
         let rec split (acc, group) list' =
             match list' with
