@@ -17,13 +17,13 @@ let directions =
     List.allPairs [ -1 .. 1 ] [ -1 .. 1 ]
     |> List.except [ (0, 0) ]
 
-let adjacents (x, y) area =
-    let width, height =
-        Array2D.length1 area, Array2D.length2 area
+let isValidCoordinate area (x, y) =
+    x >= 0 && x < (Array2D.length1 area) && y >= 0 && y < (Array2D.length2 area)
 
+let adjacents (x, y) area =
     directions
     |> List.map (fun (a, b) -> (x + a, y + b))
-    |> List.filter (fun (a, b) -> a >= 0 && a < width && b >= 0 && b < height)
+    |> List.filter (isValidCoordinate area)
 
 let print area =
     [ 0 .. (Array2D.length2 area - 1) ]
@@ -70,12 +70,9 @@ let rule1 area x y =
 
 //--- Part 2
 
-let isValidPos area (x, y) =
-    x >= 0 && x < (Array2D.length1 area) && y >= 0 && y < (Array2D.length2 area)
-
 let rec firstVisibleSeat area (x, y) (dx, dy) =
     let x', y' = x + dx, y + dy
-    if isValidPos area (x', y') then
+    if isValidCoordinate area (x', y') then
         if area.[x', y'] <> '.' then Some (x', y') else firstVisibleSeat area (x', y') (dx, dy)
     else
         None    
