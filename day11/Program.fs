@@ -50,7 +50,7 @@ let rec run area rule =
     let area' = next area rule
     if area = area' then area else run area' rule
 
-let occupied area =
+let numOccupiedSeats area =
     area
     |> Array2D.toSeq
     |> Seq.filter (snd >> (=) '#')
@@ -70,50 +70,39 @@ let rule1 area x y =
 
 //--- Part 2
 
-let length (x, y) =
-    Math.Sqrt(float x ** 2.0 + float y ** 2.0)
+let isValidPos area (x, y) =
+    x >= 0 && x < (Array2D.length1 area) && y >= 0 && y < (Array2D.length2 area)
 
-let toVector zero coordinate =
-    (fst coordinate - fst zero, snd coordinate - snd zero)
+let rec firstVisibleSeat area (x, y) (dx, dy) =
+    let x', y' = x + dx, y + dy
+    if isValidPos area (x', y') then
+        if area.[x', y'] <> '.' then Some (x', y') else firstVisibleSeat area (x', y') (dx, dy)
+    else
+        None    
 
-let direction (x, y) =
+let seats area (x, y) =
     directions
-    |> List.tryFind (fun (a, b) -> Math.Atan2(float x, float y) = Math.Atan2(float a, float b))
-
-let seats area zero =
-    area
-    |> Array2D.toSeq
-    |> Seq.fold (fun map ((x, y), value) ->
-        if (x, y) = zero || value = '.' then
-            map
-        else
-            match direction (toVector zero (x, y)) with
-            | None -> map
-            | Some dir ->
-                let positions =
-                    if Map.containsKey dir map then map.[dir] else []
-
-                Map.add dir (((x, y), value) :: positions) map) Map.empty<int * int, ((int * int) * char) list>
-    |> Map.map (fun _ list -> List.sortBy (fun (pos, _) -> toVector zero pos |> length) list)
+    |> List.map (firstVisibleSeat area (x, y))
+    |> List.fold (fun acc value ->
+        match value with
+        | Some (x, y) -> area.[x,y] :: acc
+        | None -> acc) []
 
 let rule2 area x y =
-    let firstSeats =
-        seats area (x, y)
-        |> Map.toList
-        |> List.map (fun (_, list) -> List.head list |> snd)
+    let seats = seats area (x, y)   
 
     match area.[x, y] with
-    | 'L' -> if allSeatsEmpty firstSeats then '#' else 'L'
-    | '#' -> if atLeastOccupied 5 firstSeats then 'L' else '#'
+    | 'L' -> if allSeatsEmpty seats then '#' else 'L'
+    | '#' -> if atLeastOccupied 5 seats then 'L' else '#'
     | x -> x
 
 [<EntryPoint>]
 let main _ =
     let area' = run area rule1
     print area' |> ignore
-    printfn "Part 1: %A" (occupied area')
+    printfn "Part 1: %A" (numOccupiedSeats area')
 
     let area'' = run area rule2
     print area'' |> ignore
-    printfn "Part 2: %A" (occupied area'')
+    printfn "Part 2: %A" (numOccupiedSeats area'')
     0
