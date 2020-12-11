@@ -20,8 +20,8 @@ let part1 (adapters: int list) =
 let rec count group =
     match group with
     | x :: y :: xs when (x = 1 && y = 1) -> count (1 :: xs) + count (2 :: xs)
-    | x :: y :: xs when (x = 1 && y = 2) -> count (3 :: xs) + count (2 :: xs)
-    | x :: y :: xs when (x = 2 && y = 1) -> count (3 :: xs) + count (1 :: xs)
+    | x :: y :: xs when (x = 1 && y = 2) -> count xs + count (2 :: xs)
+    | x :: y :: xs when (x = 2 && y = 1) -> count xs + count (1 :: xs)
     | x :: xs -> count xs
     | [] -> 1L
 
