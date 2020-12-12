@@ -42,19 +42,19 @@ let numOccupiedSeats grid =
     |> Seq.filter (snd >> (=) '#')
     |> Seq.length
 
-let rule (grid: char[,]) (x, y) n positions =
-    match grid.[x, y] with
+let update value n positions =
+    match value with
     | 'L' -> if onlyEmptySeats positions then '#' else 'L'
     | '#' -> if atLeastOccupied n positions then 'L' else '#'
     | x -> x
 
-let rec evolve grid rule =
-    let grid' = Array2D.init (Array2D.length1 grid) (Array2D.length2 grid) (rule grid)
-    if grid = grid' then grid else evolve grid' rule
+let rec evolve grid initializer =
+    let grid' = Array2D.init (Array2D.length1 grid) (Array2D.length2 grid) (initializer grid)
+    if grid = grid' then grid else evolve grid' initializer
 
 //--- Part 1
 
-let rule1 grid x y = adjacents (x, y) grid |> rule grid (x, y) 4    
+let initializer1 grid x y = adjacents (x, y) grid |> update grid.[x, y] 4    
 
 //--- Part 2
 
@@ -73,15 +73,15 @@ let seats grid (x, y) =
         | Some (x, y) -> grid.[x,y] :: acc
         | None -> acc) []
 
-let rule2 grid x y = seats grid (x, y) |> rule grid (x, y) 5   
+let initializer2 grid x y = seats grid (x, y) |> update grid.[x, y] 5   
 
 [<EntryPoint>]
 let main _ =
-    let grid' = evolve grid rule1
+    let grid' = evolve grid initializer1
     print grid' |> ignore
     printfn "Part 1: %A" (numOccupiedSeats grid')
 
-    let grid'' = evolve grid rule2
+    let grid'' = evolve grid initializer2
     print grid'' |> ignore
     printfn "Part 2: %A" (numOccupiedSeats grid'')
     0
