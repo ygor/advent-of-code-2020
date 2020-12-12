@@ -6,28 +6,26 @@ let input =
     |> Seq.map (List.ofSeq)
     |> List.ofSeq
 
-let area =
-    let width =
-        input |> List.map (List.length) |> List.max
-
+let grid =
+    let width = input |> List.map (List.length) |> List.max
     Array2D.init width (input.Length) (fun x y -> input.[y].[x])
 
 let directions =
-    List.allPairs [ -1 .. 1 ] [ -1 .. 1 ]
-    |> List.except [ (0, 0) ]
+    List.allPairs [ -1 .. 1 ] [ -1 .. 1 ] |> List.except [ (0, 0) ]
 
-let inArea area (x, y) =
-    x >= 0 && x < (Array2D.length1 area) && y >= 0 && y < (Array2D.length2 area)
+let onGrid grid (x, y) =
+    x >= 0 && x < (Array2D.length1 grid) && y >= 0 && y < (Array2D.length2 grid)
 
-let adjacents (x, y) area =
+let adjacents (x, y) grid =
     directions
     |> List.map (fun (a, b) -> (x + a, y + b))
-    |> List.filter (inArea area)
+    |> List.filter (onGrid grid)
+    |> List.map (fun (x, y) -> grid.[x, y])
 
-let print area =
-    [ 0 .. (Array2D.length2 area - 1) ]
+let print grid =
+    [ 0 .. (Array2D.length2 grid - 1) ]
     |> List.map (fun y ->
-        area.[*, y]
+        grid.[*, y]
         |> Array.map string
         |> Array.reduce (+)
         |> printfn "%s")
@@ -38,60 +36,52 @@ let onlyEmptySeats positions =
 let atLeastOccupied n positions =
     (List.filter ((=) '#') positions |> List.length) >= n
 
-let numOccupiedSeats area =
-    area
+let numOccupiedSeats grid =
+    grid
     |> Array2D.toSeq
     |> Seq.filter (snd >> (=) '#')
     |> Seq.length
 
-let rec evolve area rule =
-    let area' = Array2D.init (Array2D.length1 area) (Array2D.length2 area) (rule area)
-    if area = area' then area else evolve area' rule
+let rule (grid: char[,]) (x, y) n positions =
+    match grid.[x, y] with
+    | 'L' -> if onlyEmptySeats positions then '#' else 'L'
+    | '#' -> if atLeastOccupied n positions then 'L' else '#'
+    | x -> x
+
+let rec evolve grid rule =
+    let grid' = Array2D.init (Array2D.length1 grid) (Array2D.length2 grid) (rule grid)
+    if grid = grid' then grid else evolve grid' rule
 
 //--- Part 1
 
-let rule1 area x y =
-    let positions =
-        adjacents (x, y) area
-        |> List.map (fun (x, y) -> area.[x, y])
-
-    match area.[x, y] with
-    | 'L' -> if onlyEmptySeats positions then '#' else 'L'
-    | '#' -> if atLeastOccupied 4 positions then 'L' else '#'
-    | x -> x
+let rule1 grid x y = adjacents (x, y) grid |> rule grid (x, y) 4    
 
 //--- Part 2
 
-let rec firstVisibleSeat area (x, y) (dx, dy) =
+let rec seatInSight grid (x, y) (dx, dy) =
     let x', y' = x + dx, y + dy
-    if inArea area (x', y') then
-        if area.[x', y'] <> '.' then Some (x', y') else firstVisibleSeat area (x', y') (dx, dy)
+    if onGrid grid (x', y') then
+        if grid.[x', y'] <> '.' then Some (x', y') else seatInSight grid (x', y') (dx, dy)
     else
         None
 
-let seats area (x, y) =
+let seats grid (x, y) =
     directions
-    |> List.map (firstVisibleSeat area (x, y))
+    |> List.map (seatInSight grid (x, y))
     |> List.fold (fun acc value ->
         match value with
-        | Some (x, y) -> area.[x,y] :: acc
+        | Some (x, y) -> grid.[x,y] :: acc
         | None -> acc) []
 
-let rule2 area x y =
-    let seats = seats area (x, y)   
-
-    match area.[x, y] with
-    | 'L' -> if onlyEmptySeats seats then '#' else 'L'
-    | '#' -> if atLeastOccupied 5 seats then 'L' else '#'
-    | x -> x
+let rule2 grid x y = seats grid (x, y) |> rule grid (x, y) 5   
 
 [<EntryPoint>]
 let main _ =
-    let area' = evolve area rule1
-    print area' |> ignore
-    printfn "Part 1: %A" (numOccupiedSeats area')
+    let grid' = evolve grid rule1
+    print grid' |> ignore
+    printfn "Part 1: %A" (numOccupiedSeats grid')
 
-    let area'' = evolve area rule2
-    print area'' |> ignore
-    printfn "Part 2: %A" (numOccupiedSeats area'')
+    let grid'' = evolve grid rule2
+    print grid'' |> ignore
+    printfn "Part 2: %A" (numOccupiedSeats grid'')
     0
