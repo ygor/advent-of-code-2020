@@ -61,16 +61,15 @@ let initializer1 grid x y = adjacents (x, y) grid |> update grid.[x, y] 4
 let rec seatInSight grid (x, y) (dx, dy) =
     let x', y' = x + dx, y + dy
     if onGrid grid (x', y') then
-        if grid.[x', y'] <> '.' then Some (x', y') else seatInSight grid (x', y') (dx, dy)
+        if grid.[x', y'] <> '.' then Some grid.[x', y'] else seatInSight grid (x', y') (dx, dy)
     else
         None
 
 let seats grid (x, y) =
     directions
     |> List.map (seatInSight grid (x, y))
-    |> List.fold (fun acc value ->
-        match value with
-        | Some (x, y) -> grid.[x,y] :: acc
+    |> List.fold (fun acc -> function
+        | Some pos -> pos :: acc
         | None -> acc) []
 
 let initializer2 grid x y = seats grid (x, y) |> update grid.[x, y] 5   
