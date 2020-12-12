@@ -19,9 +19,9 @@ let part1 =
         | Regex "S(\d+)" [ units ] -> (x, y - float units), dir
         | Regex "E(\d+)" [ units ] -> (x + float units, y), dir
         | Regex "W(\d+)" [ units ] -> (x - float units, y), dir
-        | Regex "L(\d+)" [ degrees ] -> (x, y), rotate dir (float degrees)
-        | Regex "R(\d+)" [ degrees ] -> (x, y), rotate dir (-1.0 * float degrees)
         | Regex "F(\d+)" [ units ] -> (x + float units * fst dir, y + float units * snd dir), dir
+        | Regex "L(\d+)" [ degrees ] -> (x, y), rotate dir (float degrees)
+        | Regex "R(\d+)" [ degrees ] -> (x, y), rotate dir (-1.0 * float degrees)        
         | x -> failwithf "Invalid instruction %s" x) ((0.0, 0.0), (1.0, 0.0))
     |> (fst >> manhattan)
 
