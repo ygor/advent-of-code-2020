@@ -10,11 +10,9 @@ let grid =
     let width = input |> List.map (List.length) |> List.max
     Array2D.init width (input.Length) (fun x y -> input.[y].[x])
 
-let directions =
-    List.allPairs [ -1 .. 1 ] [ -1 .. 1 ] |> List.except [ (0, 0) ]
+let directions = List.allPairs [ -1 .. 1 ] [ -1 .. 1 ] |> List.except [ (0, 0) ]
 
-let onGrid grid (x, y) =
-    x >= 0 && x < (Array2D.length1 grid) && y >= 0 && y < (Array2D.length2 grid)
+let onGrid grid (x, y) = x >= 0 && x < (Array2D.length1 grid) && y >= 0 && y < (Array2D.length2 grid)
 
 let adjacents (x, y) grid =
     directions
@@ -30,11 +28,9 @@ let print grid =
         |> Array.reduce (+)
         |> printfn "%s")
 
-let onlyEmptySeats positions =
-    List.forall (fun pos -> pos = 'L' || pos = '.') positions
+let onlyEmptySeats positions = List.forall (fun pos -> pos = 'L' || pos = '.') positions
 
-let atLeastOccupied n positions =
-    (List.filter ((=) '#') positions |> List.length) >= n
+let atLeastOccupied n positions = (List.filter ((=) '#') positions |> List.length) >= n
 
 let numOccupiedSeats grid =
     grid
@@ -52,11 +48,7 @@ let rec evolve grid initializer =
     let grid' = Array2D.init (Array2D.length1 grid) (Array2D.length2 grid) (initializer grid)
     if grid = grid' then grid else evolve grid' initializer
 
-//--- Part 1
-
 let initializer1 grid x y = adjacents (x, y) grid |> update grid.[x, y] 4    
-
-//--- Part 2
 
 let rec seatInSight grid (x, y) (dx, dy) =
     let x', y' = x + dx, y + dy
