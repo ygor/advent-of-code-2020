@@ -20,14 +20,6 @@ let adjacents (x, y) grid =
     |> List.filter (onGrid grid)
     |> List.map (fun (x, y) -> grid.[x, y])
 
-let print grid =
-    [ 0 .. (Array2D.length2 grid - 1) ]
-    |> List.map (fun y ->
-        grid.[*, y]
-        |> Array.map string
-        |> Array.reduce (+)
-        |> printfn "%s")
-
 let onlyEmptySeats positions = List.forall (fun pos -> pos = 'L' || pos = '.') positions
 
 let atLeastOccupied n positions = (List.filter ((=) '#') positions |> List.length) >= n
@@ -69,10 +61,8 @@ let initializer2 grid x y = seats grid (x, y) |> update grid.[x, y] 5
 [<EntryPoint>]
 let main _ =
     let grid' = evolve grid initializer1
-    print grid' |> ignore
     printfn "Part 1: %A" (numOccupiedSeats grid')
 
     let grid'' = evolve grid initializer2
-    print grid'' |> ignore
     printfn "Part 2: %A" (numOccupiedSeats grid'')
     0
