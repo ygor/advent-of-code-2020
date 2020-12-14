@@ -25,7 +25,7 @@ let part1 =
 
 let extendedEuclid (x: bigint) (y: bigint) =
     let x0, x1, y0, y1 = 1I, 0I, 0I, 1I
-    
+
     let rec inner (x, y, x0, x1, y0, y1) =
         if y > 0I then
             let q, x', y' = x / y, y, x % y
@@ -34,13 +34,17 @@ let extendedEuclid (x: bigint) (y: bigint) =
             inner (x', y', x0', x1', y0', y1')
         else
             x, x0, y0
-    
-    inner (x, y, x0, x1, y0, y1) 
-    
+
+    inner (x, y, x0, x1, y0, y1)
+
 let chineseRemainder (bs: bigint list) (ns: bigint list) =
     let N = ns |> List.fold (*) 1I
     let Ns = ns |> List.map (fun n -> N / n)
-    let ms = List.zipWith extendedEuclid ns Ns |> List.map Tuple.trd 
+
+    let ms =
+        List.zipWith extendedEuclid ns Ns
+        |> List.map Tuple.trd
+
     let As = List.zipWith3 (*) bs ms Ns
     List.sum As % N
 
