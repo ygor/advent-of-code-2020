@@ -6,28 +6,30 @@ let numbers =
     |> String.split ","
     |> List.map int
 
-let next (numbers: int list) (lookup: Map<int, int list>) =
-    match lookup.[List.head numbers] with
-    | x :: y :: _ ->
-        let value = x - y
-        let previous = if lookup.ContainsKey value then List.take 1 lookup.[value] else []
-        
-        value :: numbers,
-        lookup.Add (value, numbers.Length :: previous)
-    | _ :: [] -> (0 :: numbers), lookup.Add(0,  numbers.Length :: List.take 1 lookup.[0])
-    | [] -> numbers, lookup
+let say (last: int) (turn: int) (spoken: (int * int) []) =
+    let add value =
+        spoken.[value] <- turn, fst spoken.[value]
+        value, turn + 1, spoken
 
-let lookup (numbers: int list) =
+    let said = spoken.[last]
+    if snd said < 0 then add 0 else add (fst said - snd said)
+
+let rec nextTurn (last, turn, spoken) maxTurns =
+    if turn = maxTurns then last else nextTurn (say last turn spoken) maxTurns
+
+let readStartingNumbers (numbers: int list) (spoken: (int * int) []) =
     numbers
     |> List.mapi (fun i x -> i, x)
-    |> List.fold (fun (lookup': Map<int, int list>) (i, x) ->
-        lookup'.Add(x, [ i ])) Map.empty<int, int list>
+    |> List.fold (fun (spoken': (int * int) []) (i, x) ->
+        spoken'.[x] <- (i, -1)
+        spoken') spoken
 
-let rec part1 (numbers, lookup) round =
-    if round = 0 then List.head numbers else part1 (next numbers lookup) (round - 1)
+let play n =
+    let spoken = readStartingNumbers numbers (Array.create n (-1, -1))
+    nextTurn (numbers |> List.last, numbers.Length, spoken) n
 
 [<EntryPoint>]
 let main _ =
-    printfn "Part 1: %A" (part1 (numbers |> List.rev, (lookup numbers)) (2020 - List.length numbers))
-    printfn "Part 2: %A" (part1 (numbers, (lookup numbers)) (1000000 - List.length numbers))
+    printfn "Part 1: %A" (play 2020)
+    printfn "Part 2: %A" (play 30_000_000)
     0
