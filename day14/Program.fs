@@ -16,10 +16,8 @@ let parseMask input =
     { One = parse '1';  Zero = parse '0'; Float = parse 'X' }
 
 let update1 system address value =
-    let value' = (value ||| system.Mask.One) &&& (~~~system.Mask.Zero)
-
     { system with
-          Memory = system.Memory.Add(address, value') }
+          Memory = system.Memory.Add(address, (value ||| system.Mask.One) &&& (~~~system.Mask.Zero)) }
 
 let rec generateAddresses (address: int64) (floating: int64) =
     let floatingBits =
