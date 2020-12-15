@@ -6,27 +6,24 @@ let numbers =
     |> String.split ","
     |> List.map int
 
-let say (last: int) (turn: int) (spoken: (int * int) []) =
-    let add value =
-        spoken.[value] <- turn, fst spoken.[value]
-        value, turn + 1, spoken
-
-    let said = spoken.[last]
-    if snd said < 0 then add 0 else add (fst said - snd said)
+let say (last: int) (lastIndex: int) (spoken: int []) =
+    let next = if spoken.[last] >= 0 && spoken.[last] <> lastIndex then lastIndex - spoken.[last] else 0
+    spoken.[last] <- lastIndex
+    next, lastIndex + 1, spoken
 
 let rec nextTurn (last, turn, spoken) maxTurns =
-    if turn = maxTurns then last else nextTurn (say last turn spoken) maxTurns
+    if turn = (maxTurns - 1) then last else nextTurn (say last turn spoken) maxTurns
 
-let readStartingNumbers (numbers: int list) (spoken: (int * int) []) =
+let readStartingNumbers (numbers: int list) (spoken: int []) =
     numbers
     |> List.mapi (fun i x -> i, x)
-    |> List.fold (fun (spoken': (int * int) []) (i, x) ->
-        spoken'.[x] <- (i, -1)
+    |> List.fold (fun (spoken': int []) (i, x) ->
+        spoken'.[x] <- i
         spoken') spoken
 
 let play n =
-    let spoken = readStartingNumbers numbers (Array.create n (-1, -1))
-    nextTurn (numbers |> List.last, numbers.Length, spoken) n
+    let spoken = readStartingNumbers numbers (Array.create n -1)
+    nextTurn (numbers |> List.last, numbers.Length - 1, spoken) n
 
 [<EntryPoint>]
 let main _ =
