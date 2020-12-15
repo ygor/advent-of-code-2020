@@ -11,8 +11,8 @@ let say (last: int) (lastIndex: int) (spoken: int []) =
     spoken.[last] <- lastIndex
     next, lastIndex + 1, spoken
 
-let rec nextTurn (last, turn, spoken) maxTurns =
-    if turn = (maxTurns - 1) then last else nextTurn (say last turn spoken) maxTurns
+let rec nextTurn (last, lastIndex, spoken) maxTurns =
+    if lastIndex = (maxTurns - 1) then last else nextTurn (say last lastIndex spoken) maxTurns
 
 let readStartingNumbers (numbers: int list) (spoken: int []) =
     numbers
