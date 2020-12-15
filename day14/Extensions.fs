@@ -8,19 +8,15 @@ let (|Regex|_|) pattern input =
     then Some(List.tail [ for g in m.Groups -> g.Value ])
     else None
 
-module List =
-    let pure' value =
-        [ value ]
+module List =        
+    let rec comb n l = 
+        match n, l with
+        | 0, _ -> [[]]
+        | _, [] -> []
+        | k, (x::xs) -> List.map ((@) [x]) (comb (k-1) xs) @ comb k xs
         
-module Regex =
-    let replace (pattern:string) (replacement:string) (input:string) =
-        Regex.Replace(input, pattern, replacement)
-
 module Map =
     let sumBy (projection: 'a * 'b -> int64) map =
         map
         |> Map.toSeq
         |> Seq.sumBy projection
-        
-module String =
-    let split (sep: string) (value: string) = value.Split(sep) |> List.ofArray

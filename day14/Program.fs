@@ -1,51 +1,39 @@
-﻿open System
-open System.IO
+﻿open System.IO
 open Extensions
 
 let input =
     File.ReadAllLines("input.txt") |> List.ofSeq
 
-type Emulator =
-    { Mask: string
-      Memory: Map<int64, int64> }
+type Mask = { One: int64; Zero: int64; Floating: int64 }
+type Emulator = { Mask: Mask; Memory: Map<int64, int64> }
 
-    static member Create =
-        { Mask = ""
-          Memory = Map.empty<int64, int64> }
+let parseMask input =
+    let parse value =
+        input
+        |> List.ofSeq
+        |> List.fold (fun mask c -> mask <<< 1 ||| (if c = value then 1L else 0L)) 0L
 
-let parseMask1 mask =
-    [ Convert.ToInt64(Regex.replace "X" "0" mask, 2), (|||)
-      Convert.ToInt64(Regex.replace "X" "1" mask, 2), (&&&) ]
-
-let parseMask2 mask =
-    [ Convert.ToInt64(Regex.replace "X" "0" mask, 2), (|||) ]
-
-let applyMask mask value =
-    mask
-    |> List.fold (fun result (m, op) -> op m result) value
+    { One = parse '1';  Zero = parse '0'; Floating = parse 'X' }
 
 let update1 system address value =
-    { system with
-          Memory = system.Memory.Add(address, applyMask (parseMask1 system.Mask) value) }
+    let value' = (value ||| system.Mask.One) &&& (~~~system.Mask.Zero)
 
-let rec generateAddresses mask input (addresses: char list list) =
-    match mask, input with
-    | [], [] -> addresses
-    | x :: xs, y :: ys ->
-        let heads = if y = 'X' then [ '1'; '0' ] else [ x ]
-        addresses
-        |> List.map (fun address -> heads |> List.map (List.pure' >> List.append address))
-        |> List.concat
-        |> generateAddresses xs ys
-    | x -> failwithf "Mask and input should be of the same length: %A" x
+    { system with
+          Memory = system.Memory.Add(address, value') }
+
+let rec generateAddresses (address: int64) (floating: int64) =
+    let floatingBits =
+        [ 0 .. 35 ]
+        |> List.filter (fun i -> (floating >>> i) &&& 1L = 1L)
+
+    [ 0 .. floatingBits.Length ]
+    |> List.map (fun j -> floatingBits |> List.comb j)
+    |> List.concat
+    |> List.map (List.fold (fun address' i -> address' ||| (1L <<< i)) address)
 
 let update2 system address value =
-    let masked = applyMask (parseMask2 system.Mask) address
-    let maskedLiteral = Convert.ToString(masked, 2).PadLeft(system.Mask.Length, '0')
-    let addressLiterals = generateAddresses (maskedLiteral |> List.ofSeq) (system.Mask |> List.ofSeq) [[]]
-    
-    addressLiterals |> List.fold (fun system' address ->
-        let address' = Convert.ToInt64(address |> Array.ofList |> String, 2)
+    generateAddresses (address &&& system.Mask.Zero ||| system.Mask.One) (system.Mask.Floating)
+    |> List.fold (fun system' address' ->
         { system' with
               Memory = system'.Memory.Add(address', value) }) system
 
@@ -54,8 +42,9 @@ let run update =
     |> Seq.fold (fun system line ->
         match line with
         | Regex "mem\[(\d+)\] = (\d+)" [ address; value ] -> update system (int64 address) (int64 value)
-        | Regex "mask = (.*)" [ mask ] -> { system with Mask = mask }
-        | x -> failwithf "Invalid input: %s" x) Emulator.Create
+        | Regex "mask = (.*)" [ mask ] -> { system with Mask = parseMask mask }
+        | x -> failwithf "Invalid input: %s" x)
+            { Mask = { One = 0L; Zero = 0L; Floating = 0L };  Memory = Map.empty<int64, int64> }
 
 [<EntryPoint>]
 let main _ =
