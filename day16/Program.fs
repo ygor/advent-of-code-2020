@@ -4,7 +4,6 @@ open Extensions
 type Ticket = int list
 type Range = int * int
 type Field = string * Range list
-
 type Notes = { Fields: Field list; YourTicket: Ticket; NearbyTickets: Ticket list }
 
 let parseFields input =
