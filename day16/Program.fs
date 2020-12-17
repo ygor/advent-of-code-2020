@@ -33,7 +33,7 @@ let isValidFieldValue field value =
 let isValidValue fields value =
     fields |> List.fold (fun valid field -> valid || isValidFieldValue field value) false
 
-let errorRate fields tickets =
+let part1 fields tickets =
     tickets
     |> List.concat
     |> List.filter (isValidValue fields >> not)
@@ -70,6 +70,6 @@ let part2 (yourTicket: Ticket) fields validTickets =
 
 [<EntryPoint>]
 let main _ =
-    printfn "Part 1: %A" (errorRate notes.Fields notes.NearbyTickets)
+    printfn "Part 1: %A" (part1 notes.Fields notes.NearbyTickets)
     printfn "Part 2: %A" (part2 notes.YourTicket notes.Fields (validTickets notes.Fields notes.NearbyTickets))
     0
