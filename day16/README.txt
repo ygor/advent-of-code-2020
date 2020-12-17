@@ -1,51 +1,62 @@
---- Day 15: Rambunctious Recitation ---
+--- Day 16: Ticket Translation ---
 
-You catch the airport shuttle and try to book a new flight to your vacation island. Due to the storm, all direct flights have been cancelled, but a route is available to get around the storm. You take it.
+As you're walking to yet another connecting flight, you realize that one of the legs of your re-routed trip coming up is on a high-speed train. However, the train ticket you were given is in a language you don't understand. You should probably figure out what it says before you get to the train station after the next flight.
 
-While you wait for your flight, you decide to check in with the Elves back at the North Pole. They're playing a memory game and are ever so excited to explain the rules!
+Unfortunately, you can't actually read the words on the ticket. You can, however, read the numbers, and so you figure out the fields these tickets must have and the valid ranges for values in those fields.
 
-In this game, the players take turns saying numbers. They begin by taking turns reading from a list of starting numbers (your puzzle input). Then, each turn consists of considering the most recently spoken number:
+You collect the rules for ticket fields, the numbers on your ticket, and the numbers on other nearby tickets for the same train service (via the airport security cameras) together into a single document you can reference (your puzzle input).
 
-If that was the first time the number has been spoken, the current player says 0.
-Otherwise, the number had been spoken before; the current player announces how many turns apart the number is from when it was previously spoken.
-So, after the starting numbers, each turn results in that player speaking aloud either 0 (if the last number is new) or an age (if the last number is a repeat).
+The rules for ticket fields specify a list of fields that exist somewhere on the ticket and the valid ranges of values for each field. For example, a rule like class: 1-3 or 5-7 means that one of the fields in every ticket is named class and can be any value in the ranges 1-3 or 5-7 (inclusive, such that 3 and 5 are both valid in this field, but 4 is not).
 
-For example, suppose the starting numbers are 0,3,6:
+Each ticket is represented by a single line of comma-separated values. The values are the numbers on the ticket in the order they appear; every ticket has the same format. For example, consider this ticket:
 
-Turn 1: The 1st number spoken is a starting number, 0.
-Turn 2: The 2nd number spoken is a starting number, 3.
-Turn 3: The 3rd number spoken is a starting number, 6.
-Turn 4: Now, consider the last number spoken, 6. Since that was the first time the number had been spoken, the 4th number spoken is 0.
-Turn 5: Next, again consider the last number spoken, 0. Since it had been spoken before, the next number to speak is the difference between the turn number when it was last spoken (the previous turn, 4) and the turn number of the time it was most recently spoken before then (turn 1). Thus, the 5th number spoken is 4 - 1, 3.
-Turn 6: The last number spoken, 3 had also been spoken before, most recently on turns 5 and 2. So, the 6th number spoken is 5 - 2, 3.
-Turn 7: Since 3 was just spoken twice in a row, and the last two turns are 1 turn apart, the 7th number spoken is 1.
-Turn 8: Since 1 is new, the 8th number spoken is 0.
-Turn 9: 0 was last spoken on turns 8 and 4, so the 9th number spoken is the difference between them, 4.
-Turn 10: 4 is new, so the 10th number spoken is 0.
-(The game ends when the Elves get sick of playing or dinner is ready, whichever comes first.)
+.--------------------------------------------------------.
+| ????: 101    ?????: 102   ??????????: 103     ???: 104 |
+|                                                        |
+| ??: 301  ??: 302             ???????: 303      ??????? |
+| ??: 401  ??: 402           ???? ????: 403    ????????? |
+'--------------------------------------------------------'
+Here, ? represents text in a language you don't understand. This ticket might be represented as 101,102,103,104,301,302,303,401,402,403; of course, the actual train tickets you're looking at are much more complicated. In any case, you've extracted just the numbers in such a way that the first number is always the same specific field, the second number is always a different specific field, and so on - you just don't know what each position actually means!
 
-Their question for you is: what will be the 2020th number spoken? In the example above, the 2020th number spoken will be 436.
+Start by determining which tickets are completely invalid; these are tickets that contain values which aren't valid for any field. Ignore your ticket for now.
 
-Here are a few more examples:
+For example, suppose you have the following notes:
 
-Given the starting numbers 1,3,2, the 2020th number spoken is 1.
-Given the starting numbers 2,1,3, the 2020th number spoken is 10.
-Given the starting numbers 1,2,3, the 2020th number spoken is 27.
-Given the starting numbers 2,3,1, the 2020th number spoken is 78.
-Given the starting numbers 3,2,1, the 2020th number spoken is 438.
-Given the starting numbers 3,1,2, the 2020th number spoken is 1836.
-Given your starting numbers, what will be the 2020th number spoken?
+class: 1-3 or 5-7
+row: 6-11 or 33-44
+seat: 13-40 or 45-50
+
+your ticket:
+7,1,14
+
+nearby tickets:
+7,3,47
+40,4,50
+55,2,20
+38,6,12
+It doesn't matter which position corresponds to which field; you can identify invalid nearby tickets by considering only whether tickets contain values that are not valid for any field. In this example, the values on the first nearby ticket are all valid for at least one field. This is not true of the other three nearby tickets: the values 4, 55, and 12 are are not valid for any field. Adding together all of the invalid values produces your ticket scanning error rate: 4 + 55 + 12 = 71.
+
+Consider the validity of the nearby tickets you scanned. What is your ticket scanning error rate?
 
 --- Part Two ---
 
-Impressed, the Elves issue you a challenge: determine the 30000000th number spoken. For example, given the same starting numbers as above:
+Now that you've identified which tickets contain invalid values, discard those tickets entirely. Use the remaining valid tickets to determine which field is which.
 
-Given 0,3,6, the 30000000th number spoken is 175594.
-Given 1,3,2, the 30000000th number spoken is 2578.
-Given 2,1,3, the 30000000th number spoken is 3544142.
-Given 1,2,3, the 30000000th number spoken is 261214.
-Given 2,3,1, the 30000000th number spoken is 6895259.
-Given 3,2,1, the 30000000th number spoken is 18.
-Given 3,1,2, the 30000000th number spoken is 362.
-Given your starting numbers, what will be the 30000000th number spoken?
+Using the valid ranges for each field, determine what order the fields appear on the tickets. The order is consistent between all tickets: if seat is the third field, it is the third field on every ticket, including your ticket.
 
+For example, suppose you have the following notes:
+
+class: 0-1 or 4-19
+row: 0-5 or 8-19
+seat: 0-13 or 16-19
+
+your ticket:
+11,12,13
+
+nearby tickets:
+3,9,18
+15,1,5
+5,14,9
+Based on the nearby tickets in the above example, the first position must be row, the second position must be class, and the third position must be seat; you can conclude that in your ticket, class is 12, row is 11, and seat is 13.
+
+Once you work out which field is which, look for the six fields on your ticket that start with the word departure. What do you get if you multiply those six values together?
