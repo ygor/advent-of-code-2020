@@ -11,9 +11,9 @@ let parseFields input =
     String.split "\n" input
     |> List.map (fun line ->
         match line with
-        | Regex "(.*): (\d+)\-(\d+) or (\d+)\-(\d+)" [ name; r1x;r1y;r2x;r2y ] ->
+        | Regex "(.*): (\d+)\-(\d+) or (\d+)\-(\d+)" [ name; r1x; r1y; r2x; r2y ] ->
             name,
-            [ (int r1x, int r1y);  (int r2x, int r2y) ]
+            [ (int r1x, int r1y); (int r2x, int r2y) ]
         | x -> failwithf "Invalid field: %s" x)
 
 let parseTicket input = String.split "," input |> List.map int
