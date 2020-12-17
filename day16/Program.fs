@@ -5,58 +5,33 @@ type Ticket = int list
 type Range = int * int
 type Field = string * Range list
 
-type Notes =
-    { Fields: Field list
-      YourTicket: Ticket
-      NearbyTickets: Ticket list }
-
-let parseRange input =
-    String.split "-" input
-    |> List.map int
-    |> List.unpack2
+type Notes = { Fields: Field list; YourTicket: Ticket; NearbyTickets: Ticket list }
 
 let parseFields input =
-    input
-    |> String.split "\n"
+    String.split "\n" input
     |> List.map (fun line ->
         match line with
-        | Regex "(.*): (.*) or (.*)" [ name; range1; range2 ] -> name, [ parseRange range1; parseRange range2 ]
+        | Regex "(.*): (\d+)\-(\d+) or (\d+)\-(\d+)" [ name; r1x;r1y;r2x;r2y ] ->
+            name,
+            [ (int r1x, int r1y);  (int r2x, int r2y) ]
         | x -> failwithf "Invalid field: %s" x)
 
-let parseTicket input =
-    input |> String.split "," |> List.map int
-
-let parseYourTicket input =
-    input
-    |> String.split "\n"
-    |> List.last
-    |> parseTicket
-
-let parseNearbyTickets input =
-    input
-    |> String.split "\n"
-    |> List.tail
-    |> List.map parseTicket
+let parseTicket input = String.split "," input |> List.map int
+let parseYourTicket input = String.split "\n" input |> List.last |> parseTicket
+let parseNearbyTickets input = String.split "\n" input |> List.tail |> List.map parseTicket
 
 let notes =
-    let (fieldsInput, ticketInput, nearbyInput) =
-        File.ReadAllText("input.txt")
-        |> String.split "\n\n"
-        |> List.unpack3
-
-    { Fields = parseFields fieldsInput
-      YourTicket = parseYourTicket ticketInput
-      NearbyTickets = parseNearbyTickets nearbyInput }
+    File.ReadAllText("input.txt")
+    |> String.split "\n\n"
+    |> List.unpack3
+    |> (fun (a, b, c) ->
+        { Fields = parseFields a; YourTicket = parseYourTicket b; NearbyTickets = parseNearbyTickets c })
 
 let isValidFieldValue field value =
-    snd field
-    |> List.fold (fun valid range ->
-        valid
-        || (value >= fst range && value <= snd range)) false
+    snd field |> List.fold (fun valid range -> valid || (value >= fst range && value <= snd range)) false
 
 let isValidValue fields value =
-    fields
-    |> List.fold (fun valid field -> valid || isValidFieldValue field value) false
+    fields |> List.fold (fun valid field -> valid || isValidFieldValue field value) false
 
 let errorRate fields tickets =
     tickets
@@ -65,49 +40,32 @@ let errorRate fields tickets =
     |> List.sum
 
 let validTickets (fields: Field list) (tickets: Ticket list) =
-    tickets
-    |> List.filter (fun ticket -> ticket |> List.forall (isValidValue fields))
+    tickets |> List.filter (fun ticket -> ticket |> List.forall (isValidValue fields))
 
-let isFieldAt i field (validTickets: Ticket list) =
+let fitsAt field (validTickets: Ticket list) i =
     validTickets
     |> List.map (fun ticket -> ticket.[i])
     |> List.fold (fun valid value -> valid && isValidFieldValue field value) true
 
+let distributeFields (fields: Field list) validTickets =
+    fields |> List.map (fun field ->
+        field, [ 0 .. (fields.Length - 1) ] |> List.filter (fitsAt field validTickets))
+
 let fitFields (fields: Field list) (validTickets) =
     [ 0 .. (fields.Length - 1) ]
-    |> List.map (fun i ->
-        i, fields
-        |> List.filter (fun field -> isFieldAt i field validTickets))
-
-
-let apply f xs ys = 
-    ys |> List.collect (fun y -> f xs y)    
-
-let identifyFields (fields: Field list) (validTickets: Ticket list) =
-    let fits = fitFields fields validTickets
-    
-    [ 0 .. (fits.Length -1 ) ]
-    let matches =
-        fits |> List.fold (fun result (i, fieldsAtIndex) ->
-            apply (fun set y -> Set.add y set) result fieldsAtIndex 
-            ) [Set.empty]
-        |> List.filter (fun fields' -> fields' |> Set.count = fields.Length)
-    
-    matches |> List.head |> Set.toList
-    
-let departureFields fields validTickets =
-    let identified = identifyFields fields validTickets
-
-    identified
-    |> List.indexed
-    |> List.filter (fun (i, field) -> (fst field).Contains("departure"))
-    |> List.map fst
+    |> List.fold (fun (result: Map<int, Field>, distribution: (Field * int list) list) _ ->
+        let field, indexes = distribution |> List.find (fun (_, indexes) -> indexes.Length = 1)
+        result.Add(List.head indexes, field),
+        distribution |> List.map (fun (field, indexes') -> field, List.except indexes indexes'))
+        (Map.empty<int, Field>, distributeFields fields validTickets)
+    |> fst
 
 let part2 (yourTicket: Ticket) fields validTickets =
-    let fields = departureFields fields validTickets
-
-    fields
-    |> List.map (fun i -> yourTicket.[i])
+    fitFields fields validTickets
+    |> Map.toList
+    |> List.filter (fun (_, field) -> (fst field).Contains("departure"))
+    |> List.map fst
+    |> List.map (fun i -> int64 yourTicket.[i])
     |> List.reduce (*)
 
 [<EntryPoint>]
