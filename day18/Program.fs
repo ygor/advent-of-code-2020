@@ -24,20 +24,34 @@ let rec parse (stack: Expression list) (input: string list) =
     | x :: xs -> parse (Leaf x :: stack) xs
     | [] -> List.rev stack    
     
-let rec solve (expressions: Expression list) =
+let rec solver1 (expressions: Expression list) =
     match expressions with
     | Leaf lf :: [] -> BigInteger.Parse lf
-    | Node lst :: [] -> solve lst
+    | Node lst :: [] -> solver1 lst
     | left :: op :: right :: tail ->
-        let left', right' = solve [left], solve [right]
+        let left', right' = solver1 [left], solver1 [right]
         let op' = if op = Leaf "*" then (*) else (+)
-        solve (Leaf (string (op' left' right')) :: tail)
+        solver1 (Leaf (string (op' left' right')) :: tail)
     | x -> failwithf "Invalid expression: %A" x
 
-let part1 input =
-    input |> List.sumBy (parse List.empty >> solve)
+let rec solver2 (expressions: Expression list) =
+    match expressions with
+    | Leaf lf :: [] -> BigInteger.Parse lf
+    | Node lst :: [] -> solver2 lst
+    | left :: op :: right :: [] ->
+        let left', right' = solver2 [left], solver2 [right]
+        let op' = if op = Leaf "*" then (*) else (+)
+        solver2 (Leaf (string (op' left' right')) :: [])
+    | left :: op1 :: right :: op2 :: tail ->
+        if op1 = Leaf "*" && op2 = Leaf "+" then solver2 (left :: op1 :: [Leaf ( string (solver2 (right :: op2 :: tail)) )])
+        else solver2 (Leaf (string (solver2 (left :: op1 :: [right]))) :: op2 :: tail)
+    | x -> failwithf "Invalid expression: %A" x
+
+let solve input solver =
+    input |> List.sumBy (parse List.empty >> solver)
 
 [<EntryPoint>]
 let main _ =
-    printfn "Part 1: %A" (part1 input)
+    printfn "Part 1: %A" (solve input solver1)
+    printfn "Part 2: %A" (solve input solver2)
     0
