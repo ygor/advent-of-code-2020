@@ -53,6 +53,6 @@ let solve input precedence =
 
 [<EntryPoint>]
 let main _ =
-    printfn "Part 1: %A" (solve input (["*",1;"+",1] |> Map.ofList))
-    printfn "Part 2: %A" (solve input (["*",1;"+",2] |> Map.ofList))
+    printfn "Part 1: %A" (solve input (["*",1; "+",1] |> Map.ofList))
+    printfn "Part 2: %A" (solve input (["*",1; "+",2] |> Map.ofList))
     0

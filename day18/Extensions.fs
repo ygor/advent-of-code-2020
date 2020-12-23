@@ -10,6 +10,3 @@ let (|Regex|_|) pattern input =
 
 module List =
     let span predicate lst = List.takeWhile (predicate) lst, List.skipWhile (predicate) lst
-    
-module String =
-    let split (sep: string) (value: string) = value.Split(sep) |> List.ofArray
