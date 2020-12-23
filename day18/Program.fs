@@ -19,9 +19,8 @@ let rec parse (stack: Expression list) (input: string list) =
     | "(" :: xs -> parse (Leaf "(" :: stack) xs
     | ")" :: xs ->
         let left, right = List.span ((<>) (Leaf "(")) stack
-        let stack' = if (not right.IsEmpty) && List.head right = Leaf "(" then List.tail right else right
-        parse (Node (List.rev left) :: stack') xs 
-    | op :: xs when op = "*" || op = "+" -> parse (Leaf op :: stack) xs
+        let stack' = if not right.IsEmpty && List.head right = Leaf "(" then List.tail right else right
+        parse (Node (List.rev left) :: stack') xs
     | x :: xs -> parse (Leaf x :: stack) xs
     | [] -> List.rev stack    
     
