@@ -11,11 +11,7 @@ let input =
     File.ReadAllLines("input.txt")
     |> List.ofArray
     |> List.map (fun line ->
-        let collection = Regex.Matches(line, "\d+|[+*()]")
-        seq {
-            for m in collection do
-                yield m.Value
-        }
+        seq { for m in Regex.Matches(line, "\d+|[+*()]") do yield m.Value }
         |> Seq.toList)
 
 let rec parse (stack: Expression list) (input: string list) =
@@ -36,9 +32,8 @@ let rec solver (precedence: Map<string, int>) (expressions: Expression list) =
     | Leaf lf :: [] -> BigInteger.Parse lf
     | Node lst :: [] -> solver precedence lst
     | left :: op :: right :: [] ->
-        let left', right' = solver precedence [ left ], solver precedence [ right ]
         let op' = if op = Leaf "*" then (*) else (+)
-        solver precedence [ Leaf <| string (op' left' right') ]
+        op' (solver precedence [ left ]) (solver precedence [ right ])
     | left :: (Leaf op1) :: right :: (Leaf op2) :: tail ->
         if precedence.[op2] > precedence.[op1] then
             let sub = solver precedence (right :: Leaf op2 :: tail)
