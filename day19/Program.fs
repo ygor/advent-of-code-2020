@@ -24,7 +24,7 @@ let parseRule input =
 let rules =
     fst input
     |> String.split "\n"
-    |> List.map (parseRule)
+    |> List.map parseRule
     |> Map.ofList
 
 let build (rules: Map<int, Rule>) maxLength =
