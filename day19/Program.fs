@@ -42,12 +42,12 @@ let build (rules: Map<int, Rule>) maxLength =
     
 let rules2 =
     rules
-    |> Map.add 8 (Or(Ids [ 42 ], Ids [ 42; 8 ]))
-    |> Map.add 11 (Or(Ids [ 42; 31 ], Ids [ 42; 11; 31 ]))
+    |> Map.add 8 (Or (Ids [ 42 ], Ids [ 42; 8 ]))
+    |> Map.add 11 (Or (Ids [ 42; 31 ], Ids [ 42; 11; 31 ]))
 
 let validate input (rules: Map<int, Rule>) =
     let messages = input |> String.split "\n"
-    let maxLength = messages |> List.map (String.length) |> List.max
+    let maxLength = messages |> List.map String.length |> List.max
     let regex = build rules maxLength
     
     messages
