@@ -68,8 +68,7 @@ let part1 =
     adjacents
     |> List.filter (fun (_, tiles) -> List.length tiles = 2)
     |> List.map fst
-    |> Set.ofList
-    |> Set.toSeq
+    |> List.unique
     |> Seq.reduce (*)
 
 [<EntryPoint>]
