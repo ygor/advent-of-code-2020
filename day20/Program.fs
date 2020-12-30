@@ -9,7 +9,7 @@ let tiles =
     |> String.split "\n\n"
     |> List.map (fun text ->
         let lines = String.split "\n" text
-        (List.head lines).Substring(5, 4) |> BigInteger.Parse, List.tail lines |> List.map (List.ofSeq))
+        (List.head lines).Substring(5, 4) |> BigInteger.Parse, List.tail lines |> List.map List.ofSeq)
 
 let flipY (tile: Tile) = tile |> List.rev
 
@@ -27,15 +27,6 @@ let group =
     |> List.collect (fun i ->
         let rotate' = Fun.repeat i rotate
         [ rotate'; rotate' >> flipY ])
-
-let print (tile: Tile) =
-    tile
-    |> List.iter (fun line ->
-        line
-        |> Array.ofList
-        |> System.String
-        |> printfn "%s")
-    printfn ""
 
 let variants =
     tiles
