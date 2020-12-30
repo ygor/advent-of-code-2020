@@ -13,14 +13,7 @@ let tiles =
 
 let flipY (tile: Tile) = tile |> List.rev
 
-let rec transpose =
-    function
-    | ((x :: xs) :: ys) as matrix ->
-        List.map List.head matrix
-        :: transpose (List.map List.tail matrix)
-    | _ -> []
-
-let rotate (tile: Tile) = tile |> transpose |> flipY
+let rotate (tile: Tile) = tile |> Matrix.transpose |> flipY
 
 let group =
     [ 0 .. 3 ]

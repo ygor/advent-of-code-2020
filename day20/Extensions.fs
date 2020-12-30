@@ -5,6 +5,14 @@ module String =
 
 module List =    
     let unique list = list |> Set.ofList |> List.ofSeq
+
+module Matrix =
+    let rec transpose =
+        function
+        | ((x :: xs) :: ys) as matrix ->
+            List.map List.head matrix
+            :: transpose (List.map List.tail matrix)
+        | _ -> []
     
 module Fun =
     let repeat n fn =
