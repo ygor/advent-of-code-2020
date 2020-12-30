@@ -9,7 +9,9 @@ let tiles =
     |> String.split "\n\n"
     |> List.map (fun text ->
         let lines = String.split "\n" text
-        (List.head lines).Substring(5, 4) |> BigInteger.Parse, List.tail lines |> List.map List.ofSeq)
+        (List.head lines).Substring(5, 4)
+        |> BigInteger.Parse,
+        List.tail lines |> List.map List.ofSeq)
 
 let flipY (tile: Tile) = tile |> List.rev
 
@@ -23,9 +25,7 @@ let group =
 
 let variants =
     tiles
-    |> List.collect (fun tile ->
-        group
-        |> List.map (fun f -> fst tile, (f << snd) tile))
+    |> List.collect (fun (id, tile) -> group |> List.map (fun f -> id, f tile))
 
 let borders (tile: Tile) =
     [ List.head tile
@@ -35,14 +35,14 @@ let borders (tile: Tile) =
 
 let adjacents =
     variants
-    |> List.map (fun variant ->
-        let vBorders = borders (snd variant)
-        fst variant,
+    |> List.map (fun (vId, variant) ->
+        let vBorders = borders variant
+        vId,
         variants
-        |> List.filter (fun tile -> fst tile <> fst variant)
-        |> List.map (fun tile ->
-            fst tile,
-            borders (snd tile)
+        |> List.filter (fun (id, _) -> id <> vId)
+        |> List.map (fun (id, tile) ->
+            id,
+            borders tile
             |> List.indexed
             |> List.filter (fun (i, border) -> vBorders.[(i + 2) % 4] = border)
             |> List.map snd)
