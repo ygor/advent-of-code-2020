@@ -15,17 +15,13 @@ let tiles =
         let id = BigInteger.Parse ((List.head lines).Substring(5, 4))
         (id, 0), List.tail lines |> List.map List.ofSeq)
 
-let seaMonster = File.ReadLines("sea_monster.txt") |> List.ofSeq |> List.map Seq.toList
-
-let flipY (rows: Rows) = rows |> List.rev
-
-let rotate (rows: Rows) = rows |> Matrix.transpose |> flipY
+let seaMonster = File.ReadLines("sea_monster.txt") |> List.ofSeq |> List.map Seq.toList 
 
 let transformations =
     [ 0 .. 3 ]
     |> List.collect (fun i ->
-        let rotate' = Fun.repeat i rotate
-        [ rotate'; rotate' >> flipY ])
+        let rotate' = Fun.repeat i (Matrix.transpose >> List.rev)
+        [ rotate'; rotate' >> List.rev ])
 
 let variants =
     tiles
