@@ -17,10 +17,7 @@ let tiles: Tiles =
         (id, 0), List.tail lines |> List.map List.ofSeq)
     |> Map.ofList
 
-let seaMonster =
-    File.ReadLines("sea_monster.txt")
-    |> List.ofSeq
-    |> List.map Seq.toList
+let seaMonster = File.ReadLines("sea_monster.txt") |> List.ofSeq |> List.map Seq.toList
 
 let flipY (rows: Rows) = rows |> List.rev
 
@@ -59,8 +56,7 @@ let adjacents: Adjacents =
             |> List.map fst)
         |> Map.filter (fun _ edges -> edges.IsEmpty |> not))
 
-let corners: Adjacents =
-    adjacents |> Map.filter (fun _ neighbours -> neighbours.Count = 2)
+let corners: Adjacents = adjacents |> Map.filter (fun _ neighbours -> neighbours.Count = 2)
 
 let topLeft =
     corners
@@ -75,8 +71,7 @@ let neighbour tileId edge =
     adjacents.[tileId]
     |> Map.findKey (fun _ edges -> List.contains ((edge + 2) % 4) edges)
 
-let crop (rows: Rows) =
-    rows.[1..(rows.Length - 2)] |> List.map (fun row -> row.[1..(row.Length - 2)])
+let crop (rows: Rows) = rows.[1..(rows.Length - 2)] |> List.map (fun row -> row.[1..(row.Length - 2)])
 
 let gridSize = float tiles.Count |> Math.Sqrt |> int
 
@@ -108,6 +103,8 @@ let imageVariants =
     transformations |> List.map (fun f -> f rows) |> List.map Array2D.fromList
 
 let isSeaMonsterAt x y (image: char [,]) =
+    let l1, l2 = Array2D.length1 image, Array2D.length2 image
+
     [ 0 .. seaMonster.Length - 1 ]
     |> Seq.fold (fun found' y' ->
         [ 0 .. seaMonster.Head.Length - 1 ]
@@ -115,10 +112,7 @@ let isSeaMonsterAt x y (image: char [,]) =
             match seaMonster.[y'].[x'] with
             | '#' ->
                 let x'', y'' = x + x', y + y'
-                found
-                && x'' < (Array2D.length1 image)
-                && y'' < (Array2D.length2 image)
-                && image.[x'', y''] = '#'
+                found && x'' < l1 && y'' < l2 && image.[x'', y''] = '#'
             | _ -> found) found') true
 
 let countSeaMonsters (image: char [,]) =
@@ -127,8 +121,7 @@ let countSeaMonsters (image: char [,]) =
         [ 0 .. (Array2D.length2 image) - 1 ]
         |> Seq.fold (fun count y -> if isSeaMonsterAt x y image then count + 1 else count) count') 0
 
-let countHashes (rows: char list list) =
-    rows |> List.concat |> List.filter ((=) '#') |> List.length
+let countHashes (rows: Rows) = rows |> List.concat |> List.filter ((=) '#') |> List.length
 
 let part1 =
     corners
