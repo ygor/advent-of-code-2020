@@ -5,17 +5,15 @@ open Extensions
 
 type Rows = char list list
 type TileId = bigint * int
-type Tiles = Map<TileId, Rows>
 type Adjacents = Map<TileId, Map<TileId, int list>>
 
-let tiles: Tiles =
+let tiles =
     File.ReadAllText("input.txt")
     |> String.split "\n\n"
     |> List.map (fun text ->
         let lines = String.split "\n" text
         let id = BigInteger.Parse ((List.head lines).Substring(5, 4))
         (id, 0), List.tail lines |> List.map List.ofSeq)
-    |> Map.ofList
 
 let seaMonster = File.ReadLines("sea_monster.txt") |> List.ofSeq |> List.map Seq.toList
 
@@ -29,9 +27,8 @@ let transformations =
         let rotate' = Fun.repeat i rotate
         [ rotate'; rotate' >> flipY ])
 
-let variants: Tiles =
+let variants =
     tiles
-    |> Map.toList
     |> List.collect (fun ((id, _), rows) ->
         transformations
         |> List.mapi (fun i f -> (id, i), f rows))
@@ -73,7 +70,7 @@ let neighbour tileId edge =
 
 let crop (rows: Rows) = rows.[1..(rows.Length - 2)] |> List.map (fun row -> row.[1..(row.Length - 2)])
 
-let gridSize = float tiles.Count |> Math.Sqrt |> int
+let gridSize = float tiles.Length |> Math.Sqrt |> int
 
 let assemble (grid: Map<int * int, TileId>) =
     let croppedTileSize = variants.[topLeft].Length - 2
@@ -94,7 +91,7 @@ let image =
                 | (0, 0) -> topLeft
                 | (0, y) -> neighbour grid'.[0, y - 1] 2
                 | (x, y) -> neighbour grid'.[x - 1, y] 1
-
+                
             grid'.Add((x, y), neighbour)) grid) Map.empty<int * int, TileId>
     |> assemble
 
