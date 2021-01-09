@@ -19,8 +19,8 @@ let tiles: Tiles =
 
 let seaMonster =
     File.ReadLines("sea_monster.txt")
-    |> Seq.map Seq.toList
-    |> Seq.toList
+    |> List.ofSeq
+    |> List.map Seq.toList
 
 let flipY (rows: Rows) = rows |> List.rev
 
@@ -60,8 +60,7 @@ let adjacents: Adjacents =
         |> Map.filter (fun _ edges -> edges.IsEmpty |> not))
 
 let corners: Adjacents =
-    adjacents
-    |> Map.filter (fun _ neighbours -> neighbours.Count = 2)
+    adjacents |> Map.filter (fun _ neighbours -> neighbours.Count = 2)
 
 let topLeft =
     corners
@@ -77,8 +76,7 @@ let neighbour tileId edge =
     |> Map.findKey (fun _ edges -> List.contains ((edge + 2) % 4) edges)
 
 let crop (rows: Rows) =
-    rows.[1..(rows.Length - 2)]
-    |> List.map (fun row -> row.[1..(row.Length - 2)])
+    rows.[1..(rows.Length - 2)] |> List.map (fun row -> row.[1..(row.Length - 2)])
 
 let gridSize = float tiles.Count |> Math.Sqrt |> int
 
@@ -107,9 +105,7 @@ let image =
 
 let imageVariants =
     let rows = image |> Array2D.toList
-    transformations
-    |> List.map (fun f -> f rows)
-    |> List.map Array2D.fromList
+    transformations |> List.map (fun f -> f rows) |> List.map Array2D.fromList
 
 let isSeaMonsterAt x y (image: char [,]) =
     [ 0 .. seaMonster.Length - 1 ]
@@ -131,14 +127,8 @@ let countSeaMonsters (image: char [,]) =
         [ 0 .. (Array2D.length2 image) - 1 ]
         |> Seq.fold (fun count y -> if isSeaMonsterAt x y image then count + 1 else count) count') 0
 
-let countHashes (rows: char [,]) =
-    rows
-    |> Array2D.toList
-    |> List.collect id
-    |> List.filter ((=) '#')
-    |> List.length
-
-let numSeaMonsterHashes = countHashes (seaMonster |> Array2D.fromList)
+let countHashes (rows: char list list) =
+    rows |> List.concat |> List.filter ((=) '#') |> List.length
 
 let part1 =
     corners
@@ -148,12 +138,10 @@ let part1 =
     |> Seq.reduce (*)
 
 let part2 =
+    let numSeaMonsterHashes = countHashes seaMonster
     imageVariants
-    |> List.map (fun rows ->
-        let monsters = countSeaMonsters rows
-        monsters,
-        countHashes rows - (monsters * numSeaMonsterHashes)) 
-    |> List.maxBy fst
+    |> List.map (fun rows -> countHashes (rows |> Array2D.toList) - (countSeaMonsters rows * numSeaMonsterHashes)) 
+    |> List.min
 
 [<EntryPoint>]
 let main _ =
