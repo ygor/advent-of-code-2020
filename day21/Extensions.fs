@@ -7,7 +7,7 @@ let (|Regex|_|) pattern input =
     if m.Success
     then Some(List.tail [ for g in m.Groups -> g.Value ])
     else None
-
+    
 module Tuple =
     let map2 f (l, r) = f l, f r
 
