@@ -1,11 +1,7 @@
 ﻿open System.IO
 open Extensions
 
-type Ingredient = string
-type Allergen = string
-type Food = string Set * string Set
-
-let foods: Food list =
+let foods =
     File.ReadAllLines("input.txt")
     |> Array.toList
     |> List.map (fun line ->
@@ -14,10 +10,9 @@ let foods: Food list =
             String.split " " ingredients |> Set.ofList, String.split ", " allergens |> Set.ofList
         | x -> failwithf "Invalid input: %s" x)
 
-let (ingredients: Ingredient Set), (allergens: Allergen Set) =
-    foods |> List.unzip |> Tuple.map2 Set.unionMany
+let ingredients, allergens = foods |> List.unzip |> Tuple.map2 Set.unionMany
 
-let possible: Ingredient Set =
+let possible =
     allergens
     |> Set.map (fun allergen ->
         foods
@@ -28,7 +23,7 @@ let possible: Ingredient Set =
 
 let inert = ingredients - possible
 
-let rec identify identified : Set<Ingredient * Allergen> =
+let rec identify identified =
     let identified' =
         (allergens - Set.map snd identified)
         |> Set.fold (fun identified' allergen ->
