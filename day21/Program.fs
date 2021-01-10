@@ -15,7 +15,7 @@ let foods: Food list =
 let ingredients, allergens =
     foods
     |> List.unzip
-    |> Tuple.map2 (List.reduce Set.union)
+    |> Tuple.map2 Set.unionMany
 
 let possible =
     allergens
