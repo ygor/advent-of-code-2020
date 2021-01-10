@@ -1,9 +1,7 @@
 ﻿open System.IO
 open Extensions
 
-type Ingredient = string
-type Allergen = string
-type Food = Ingredient Set * Allergen Set
+type Food = string Set * string Set
 
 let foods: Food list =
     File.ReadAllLines("input.txt")
@@ -12,32 +10,29 @@ let foods: Food list =
         match line with
         | Regex "(.*) \(contains (.*)\)" [ ingredients; allergens ] ->
             String.split " " ingredients |> Set.ofList, String.split ", " allergens |> Set.ofList
-        | x -> failwithf "Invalid input: %s" x) 
-        
-let allergens =
-    foods
-    |> List.map snd
-    |> List.reduce Set.union
-    |> Set.toList
-    |> List.map (fun allergen ->
-        allergen, foods |> List.filter (fun food -> snd food |> Set.contains allergen) |> List.map fst)
-    |> Map.ofList
+        | x -> failwithf "Invalid input: %s" x)
 
-let ingredientsWithoutAllergens =
-    let commons, without =
-        allergens
-        |> Map.map (fun _ foods ->
-            let common = foods |> List.reduce Set.intersect
-            common,
-            foods |> List.map (fun ingredients -> Set.difference ingredients common) |> List.reduce Set.union)
-        |> Map.fold (fun (commons, without) _ (commons', without') ->
-            Set.union commons commons', Set.union without without') (Set.empty, Set.empty)
-    Set.difference without commons
+let ingredients, allergens =
+    foods
+    |> List.unzip
+    |> Tuple.map2 (List.reduce Set.union)
+
+let possible =
+    allergens
+    |> Set.map (fun allergen ->
+        foods
+        |> List.filter (fun (_, allergens) -> allergens.Contains allergen)
+        |> List.map fst
+        |> Set.intersectMany)
+    |> Set.unionMany
+
+let without = Set.difference ingredients possible
+
 let part1 =
     foods
-    |> List.map (fun food -> fst food |> Set.intersect ingredientsWithoutAllergens |> Set.count)
+    |> List.map (fun (ingredients, _) -> Set.intersect without ingredients |> Set.count)
     |> List.reduce (+)
-        
+
 [<EntryPoint>]
 let main _ =
     printfn "Part 1: %A" part1

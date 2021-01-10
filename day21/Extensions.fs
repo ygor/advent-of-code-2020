@@ -8,5 +8,8 @@ let (|Regex|_|) pattern input =
     then Some(List.tail [ for g in m.Groups -> g.Value ])
     else None
 
+module Tuple =
+    let map2 f (l, r) = f l, f r
+
 module String =
     let split (sep: string) (value: string) = value.Split(sep) |> List.ofArray
