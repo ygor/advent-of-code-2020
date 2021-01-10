@@ -26,8 +26,7 @@ let transformations =
 let variants =
     tiles
     |> List.collect (fun ((id, _), rows) ->
-        transformations
-        |> List.mapi (fun i f -> (id, i), f rows))
+        transformations |> List.mapi (fun i f -> (id, i), f rows))
     |> Map.ofList
 
 let borders (rows: Rows) =
@@ -54,15 +53,13 @@ let corners: Adjacents = adjacents |> Map.filter (fun _ neighbours -> neighbours
 let topLeft =
     corners
     |> Map.findKey (fun _ neighbours ->
-        neighbours
-        |> Map.toList
+        Map.toList neighbours
         |> List.map (snd >> Set.ofList)
         |> List.reduce Set.union
         |> (=) ([ 0; 3 ] |> Set.ofList))
 
 let neighbour tileId edge =
-    adjacents.[tileId]
-    |> Map.findKey (fun _ edges -> List.contains ((edge + 2) % 4) edges)
+    adjacents.[tileId] |> Map.findKey (fun _ edges -> List.contains ((edge + 2) % 4) edges)
 
 let crop (rows: Rows) = rows.[1..(rows.Length - 2)] |> List.map (fun row -> row.[1..(row.Length - 2)])
 
