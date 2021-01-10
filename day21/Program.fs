@@ -26,7 +26,7 @@ let possible =
         |> Set.intersectMany)
     |> Set.unionMany
 
-let without = Set.difference ingredients possible
+let without = ingredients - possible
 
 let part1 =
     foods
