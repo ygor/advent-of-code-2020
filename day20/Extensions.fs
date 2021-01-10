@@ -13,7 +13,10 @@ module Matrix =
             List.map List.head matrix
             :: transpose (List.map List.tail matrix)
         | _ -> []
-
+    
+    let rotate<'a> : 'a list list -> 'a list list =
+        transpose >> List.rev
+        
 module Array2D =
     let toList array =
         [ 0 .. (Array2D.length2 array) - 1 ]

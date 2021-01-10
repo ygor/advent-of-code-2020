@@ -20,7 +20,7 @@ let seaMonster = File.ReadLines("sea_monster.txt") |> List.ofSeq |> List.map Seq
 let transformations =
     [ 0 .. 3 ]
     |> List.collect (fun i ->
-        let rotate' = Fun.repeat i (Matrix.transpose >> List.rev)
+        let rotate' = Fun.repeat i Matrix.rotate
         [ rotate'; rotate' >> List.rev ])
 
 let variants =
