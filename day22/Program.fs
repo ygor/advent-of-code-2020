@@ -1,12 +1,11 @@
 ﻿open System.IO
 open Extensions
 
-type Deck = int list
 type Player =
     | Player1
     | Player2
 
-let game: Deck * Deck =
+let game =
     File.ReadAllText("input.txt")
     |> String.split "\n\n"
     |> List.unpack2
