@@ -22,10 +22,6 @@ let flip floor tile =
     then Map.add tile (if floor.[tile] = Black then White else Black) floor
     else Map.add tile Black floor
 
-let adjacents tile =
-    vectors
-    |> Map.toList |> List.map (snd >> fun (x, y) -> (x + fst tile, y + snd tile))
-
 let newFloor =
     instructions
     |> Seq.fold (fun floor' instruction ->
@@ -40,7 +36,11 @@ let countBlack floor =
 
 let part1 = countBlack newFloor
 
-let whiteTiles floor =
+let adjacents tile =
+    vectors
+    |> Map.toList |> List.map (snd >> fun (x, y) -> (x + fst tile, y + snd tile))
+
+let flipBlacks floor =
     floor
     |> Map.filter (fun tile color ->
         color = Black &&
@@ -50,7 +50,7 @@ let whiteTiles floor =
         |> (fun count -> count = 0 || count > 2))
     |> Map.map (fun _ _ -> White) 
  
-let blackTiles floor =
+let flipWhites floor =
     let keys = Map.keys floor
     let maxX, minX = Seq.maxBy fst keys |> fst, Seq.minBy fst keys |> fst
     let maxY, minY = Seq.maxBy snd keys |> snd, Seq.minBy snd keys |> snd
@@ -67,8 +67,8 @@ let blackTiles floor =
 
 let dayFlip floor =
     floor
-    |> Map.join (whiteTiles floor)
-    |> Map.join (blackTiles floor)
+    |> Map.merge (flipBlacks floor)
+    |> Map.merge (flipWhites floor)
 
 let part2 =
     newFloor

@@ -1,8 +1,8 @@
 module Extensions
 
 module Map =
-    let join (p: Map<'a,'b>) (q: Map<'a,'b>) = 
-        Seq.concat [ (Map.toSeq p) ; (Map.toSeq q) ] |> Map.ofSeq    
+    let merge (p: Map<'a,'b>) (q: Map<'a,'b>) = 
+        Seq.concat [ (Map.toSeq q); (Map.toSeq p) ] |> Map.ofSeq    
 
 module Func =
     let repeat n repeater state =
