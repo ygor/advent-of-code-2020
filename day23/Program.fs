@@ -23,7 +23,7 @@ let play moves cups =
     
     [ 0 .. moves - 1 ]
     |> List.fold (fun (current, ring) _ -> move current ring (min, max))
-        (List.head cups, List.zip cups (List.tail cups @ [List.head cups])  |> Map.ofList)
+        (List.head cups, List.zip cups (List.tail cups @ [List.head cups]) |> Map.ofList)
     |> snd
 
 let score (ring: Map<int, int>) =
