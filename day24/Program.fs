@@ -3,25 +3,27 @@ open System.Text.RegularExpressions
 
 type Color = | Black | White
 
-let parse =
-    function
-    | "e" -> (1.0, 0.0)
-    | "se" -> (0.5, -1.0)
-    | "sw" -> (-0.5, -1.0)
-    | "w" -> (-1.0, 0.0)
-    | "nw" -> (-0.5, 1.0)
-    | "ne" -> (0.5, 1.0)
-    | str -> failwithf $"Invalid input %s{str}"
+let vectors = Map.ofList [
+    ("e", (1.0, 0.0))
+    ("se", (0.5, -1.0))
+    ("sw", (-0.5, -1.0))
+    ("w", (-1.0, 0.0))
+    ("nw", (-0.5, 1.0))
+    ("ne", (0.5, 1.0))]
 
 let instructions =
     File.ReadAllLines("input.txt")
     |> Seq.map
-        (fun line -> seq { for m in Regex.Matches(line, "e|se|sw|w|nw|ne") do yield parse m.Value } |> Seq.toList)
+        (fun line -> seq { for m in Regex.Matches(line, "e|se|sw|w|nw|ne") do yield vectors.[m.Value] } |> Seq.toList)
 
 let flip floor tile =
     if Map.containsKey tile floor
     then Map.add tile (if floor.[tile] = Black then White else Black) floor
     else Map.add tile Black floor
+
+let adjacents tile =
+    vectors
+    |> Map.toList |> List.map (snd >> fun (x, y) -> (x + fst tile, y + snd tile))
 
 let part1 =
     instructions
