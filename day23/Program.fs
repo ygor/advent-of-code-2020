@@ -6,24 +6,17 @@ let cups =
     |> Seq.map (string >> int)
     |> Seq.toList
 
-let pick current (ring: Map<int, int>) =
-    let hand = [0 .. 1] |> List.fold (fun hand _ -> hand @ [ring.[List.last hand]]) [ring.[current]]
-    hand, ring |> Map.removeMany hand |> Map.add current ring.[List.last hand] 
-
 let rec destination current hand ring (min, max) =
     let label = if current - 1 < min then max else current - 1
     if List.contains label hand then destination label hand ring (min, max) else label
+    
+let move current (ring: Map<int, int>) (min, max) =
+    let hand = [0 .. 1] |> List.fold (fun hand _ -> hand @ [ring.[List.last hand]]) [ring.[current]]
+    let dest = destination current hand ring (min, max)
 
-let place dest hand ring =
-    let ring'', prev =
-        hand |> List.fold (fun (ring', prev) cup -> Map.add prev cup ring', cup) (ring |> Map.remove dest, dest)
-    ring'' |> Map.add prev ring.[dest]
-
-let move current ring (min, max) =
-    let hand, ring' = pick current ring
-    let destination = destination current hand ring' (min, max)
-    let ring'' = place destination hand ring'
-    ring''.[current], ring''
+    ring.[List.last hand], ring
+       |> Map.removeMany [current; List.last hand; dest]
+       |> Map.addMany [(current, ring.[List.last hand]); (dest, List.head hand); (List.last hand, ring.[dest])]
 
 let play moves cups =
     let min, max = List.min cups, List.max cups
