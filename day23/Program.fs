@@ -11,7 +11,7 @@ let rec destination current hand ring (min, max) =
     if List.contains label hand then destination label hand ring (min, max) else label
     
 let move current (ring: Map<int, int>) (min, max) =
-    let hand = [0 .. 1] |> List.fold (fun hand _ -> hand @ [ring.[List.last hand]]) [ring.[current]]
+    let hand = Func.repeat 2 (fun hand -> hand @ [ring.[List.last hand]]) [ring.[current]]
     let dest = destination current hand ring (min, max)
 
     ring.[List.last hand], ring
@@ -21,10 +21,8 @@ let move current (ring: Map<int, int>) (min, max) =
 let play moves cups =
     let min, max = List.min cups, List.max cups
     
-    [ 0 .. moves - 1 ]
-    |> List.fold (fun (current, ring) _ -> move current ring (min, max))
+    Func.repeat moves (fun (current, ring) -> move current ring (min, max))
         (List.head cups, List.zip cups (List.tail cups @ [List.head cups]) |> Map.ofList)
-    |> snd
 
 let score (ring: Map<int, int>) =
     bigint ring.[1] * bigint ring.[ring.[1]]    
@@ -32,5 +30,5 @@ let score (ring: Map<int, int>) =
 [<EntryPoint>]
 let main _ =
     printfn $"Part1: %A{play 100 cups}"
-    printfn $"Part2: %A{play 10000000 (cups @ [10 .. 1000000]) |> score}"
+    printfn $"Part2: %A{play 10000000 (cups @ [10 .. 1000000]) |> snd |> score}"
     0
